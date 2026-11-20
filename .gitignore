@@ -1,0 +1,26 @@
+# Local builds, packaging and verification output
+/便携版/
+/验证/
+/archive/
+*.exe
+*.zip
+*.pdb
+*.tmp
+
+# Personal settings, reading history and wallpapers
+settings.xml
+quotes-state.xml
+壁纸/
+
+# Only the illustrations embedded by build.ps1 are distributed
+/assets/*
+!/assets/tree.png
+!/assets/lake.png
+!/assets/garden.png
+!/assets/forbidden-city.png
+!/assets/himalaya.png
+!/assets/mao-reading.png
+!/assets/zhou-reading.png
+!/assets/gg-bond.png
+!/assets/slow-goat.png
+!/assets/orange-hero-v16.png
