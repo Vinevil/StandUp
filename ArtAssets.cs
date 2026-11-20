@@ -11,9 +11,12 @@ namespace StandUp {
         public static readonly string[] Keys={"tree","lake","garden","forbidden-city","himalaya"};
     }
     public static class CharacterLibrary {
-        // Keep the original first two indexes to preserve existing settings.xml selections.
-        public static readonly string[] Names={"毛主席","周总理","猪猪侠","慢羊羊村长","橙留香"};
-        public static readonly string[] Keys={"mao-reading","zhou-reading","gg-bond","slow-goat","orange-hero-v16"};
+        public static readonly string[] Names={"猪猪侠","慢羊羊村长","橙留香"};
+        public static readonly string[] Keys={"gg-bond","slow-goat","orange-hero-v16"};
+        // The selection list can change independently of the IDs saved in settings.xml.
+        static readonly int[] SavedIds={2,3,4};
+        internal static int FromSavedId(int id){return Math.Max(0,Array.IndexOf(SavedIds,id));}
+        internal static int ToSavedId(int index){return SavedIds[index];}
     }
     public sealed class CharacterArt {
         public readonly Bitmap Atlas;

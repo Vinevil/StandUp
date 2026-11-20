@@ -2,9 +2,9 @@
 
 一款 Windows 桌面久坐提醒器。工作时，画面里的人物坐着读书；到了你设定的时间，他会合上书站起来，送上一句鼓励。你也可以把倒计时收成屏幕边缘的一道细线。
 
-**[下载 Windows 免安装版](https://github.com/Vinevil/StandUp/releases/download/v1.8.0/StandUp-1.8.0-Windows.zip)**　·　[版本记录](https://github.com/Vinevil/StandUp/releases)　·　[使用说明](使用说明.md)
+**[下载 Windows 免安装版](https://github.com/Vinevil/StandUp/releases/download/v1.8.1/StandUp-1.8.1-Windows.zip)**　·　[版本记录](https://github.com/Vinevil/StandUp/releases)　·　[使用说明](使用说明.md)
 
-![主窗口中的场景、读书的人物，以及精简模式下的倒计时](docs/images/standup-preview.webp)
+![猪猪侠在湖边坐着读书，旁边是精简模式的倒计时](docs/images/standup-preview.webp)
 
 ## 开始第一轮
 
@@ -22,7 +22,7 @@
 
 精简或最小化时，到点会弹出带语录的小气泡。想看人物站起，可以在设置里选择到点打开主窗口。
 
-<p align="center"><img src="docs/images/standup-reminder.webp" width="420" alt="周恩来在湖边合书起身，窗口显示鼓励语录，并提供开始活动和稍后提醒两个选择"></p>
+<p align="center"><img src="docs/images/standup-reminder.webp" width="420" alt="猪猪侠在湖边合书站起来，提醒气泡显示一句原创鼓励，底部可开始活动或延后提醒"></p>
 
 ## 换一幅风景，留一句自己的话
 
@@ -40,4 +40,8 @@
 .\build.ps1
 ```
 
-生成的程序位于 `便携版\站起来.exe`。[使用与自测说明](使用说明.md) · [画面制作说明](docs/artwork.md) · [语录出处](语录出处.md)
+生成的程序位于 `便携版\站起来.exe`。[使用与自测说明](使用说明.md) · [画面制作说明](docs/artwork.md)
+
+## 素材与语录
+
+场景和角色图集由图像生成工具绘制。动画角色原作及相关标识的权利归相应权利人。历史语录保留作者和出处。[素材与授权说明](NOTICE.md) · [语录出处](语录出处.md)

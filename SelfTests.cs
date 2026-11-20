@@ -112,7 +112,10 @@ namespace StandUp {
             for(int i=0;i<25;i++)Check(picker.Pick().Id==resumed.Pick().Id,"same unseen queue after restart");
             File.WriteAllText(stateTest,"<Quotes Version=\"1\" PoolSize=\"126\" Last=\"\"><Next>unknown</Next></Quotes>");Check(!resumed.Load(stateTest),"invalid history safely rejected");File.Delete(stateTest);
             Check(SceneLibrary.Names.Length==5&&SceneLibrary.Keys.Length==5,"all five scenes selectable");
+            Check(CharacterLibrary.Names.Length==3&&CharacterLibrary.Keys.Length==3,"three available companions");
+            Check(CharacterLibrary.FromSavedId(0)==0&&CharacterLibrary.FromSavedId(1)==0,"unsupported saved companions use the default");
             for(int p=0;p<CharacterLibrary.Names.Length;p++){
+                Check(CharacterLibrary.FromSavedId(p+2)==p&&CharacterLibrary.ToSavedId(p)==p+2,"stable saved companion ID");
                 CharacterArt art=ArtAssets.Character(p);
                 Check(art.Atlas.GetPixel(0,0).A<=2&&art.Atlas.GetPixel(art.Atlas.Width/2,art.Atlas.Height/2).A<=2,"character transparent alpha");
                 Check(art.Standing.Width>0&&art.Seated.Width>0,"both character poses");
@@ -120,7 +123,7 @@ namespace StandUp {
             }
             using(MainWindow w=new MainWindow(false))Check(w.IsFirstFrameReady(),"production startup fills controls before Show");
             using(MainWindow w=new MainWindow(true))checks+=w.CheckInterface();
-            File.WriteAllText(output,"PASS: "+checks+" assertions\r\nTimer: deadlines, sleep/wake, pause/resume, snooze, rest completion, explicit next cycle.\r\nQuotes: 126 unique entries, 3 full shuffle cycles without repeats, history persistence, honest attribution.\r\nArtwork: transparent embedded sprites, 5 characters x 5 scenes x 3 transition frames.\r\nInterface: 7 themes, companion selection, settings scroll and layout, next quote preserves timing, compact dock/reveal, minimized reminders.\r\n",new UTF8Encoding(false));
+            File.WriteAllText(output,"PASS: "+checks+" assertions\r\nTimer: deadlines, sleep/wake, pause/resume, snooze, rest completion, explicit next cycle.\r\nQuotes: 126 unique entries, 3 full shuffle cycles without repeats, history persistence, honest attribution.\r\nArtwork: transparent embedded sprites, 3 characters x 5 scenes x 3 transition frames.\r\nInterface: 7 themes, companion selection, settings scroll and layout, next quote preserves timing, compact dock/reveal, minimized reminders.\r\n",new UTF8Encoding(false));
         }
     }
 }

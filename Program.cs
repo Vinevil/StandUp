@@ -24,7 +24,9 @@ namespace StandUp {
                 if(!File.Exists(PathName))return p;
                 using(XmlReader r=XmlReader.Create(PathName,new XmlReaderSettings{DtdProcessing=DtdProcessing.Prohibit,XmlResolver=null})){
                     XElement x=XDocument.Load(r).Root;if(x==null)return p;
-                    p.Person=N(x,"Person",0,0,CharacterLibrary.Names.Length-1);p.Scene=N(x,"Scene",0,0,SceneLibrary.Names.Length-1);p.Task=N(x,"Task",0,0,2);
+                    int savedPerson;
+                    if(int.TryParse((string)x.Element("Person"),out savedPerson))p.Person=CharacterLibrary.FromSavedId(savedPerson);
+                    p.Scene=N(x,"Scene",0,0,SceneLibrary.Names.Length-1);p.Task=N(x,"Task",0,0,2);
                     p.Minutes=N(x,"Minutes",30,1,180);p.RestMinutes=N(x,"RestMinutes",2,1,30);
                     p.Width=N(x,"Width",420,360,1100);p.Height=N(x,"Height",420,386,900);
                     if(x.Element("Theme")==null&&x.Element("Height")!=null)p.Height=Math.Max(386,p.Height-40);
@@ -42,7 +44,7 @@ namespace StandUp {
         public bool Save(){
             string temp=PathName+".tmp";
             try{
-                new XDocument(new XElement("StandUp",new XElement("Person",Person),new XElement("Scene",Scene),new XElement("Task",Task),
+                new XDocument(new XElement("StandUp",new XElement("Person",CharacterLibrary.ToSavedId(Person)),new XElement("Scene",Scene),new XElement("Task",Task),
                     new XElement("Minutes",Minutes),new XElement("RestMinutes",RestMinutes),new XElement("Top",Top?"true":"false"),new XElement("Sound",Sound?"true":"false"),
                     new XElement("Popup",Popup?"true":"false"),new XElement("StartCompact",StartCompact?"true":"false"),new XElement("CompactX",CompactX),new XElement("CompactY",CompactY),new XElement("DockSide",DockSide),new XElement("Wallpaper",Wallpaper),
                     new XElement("Width",Width),new XElement("Height",Height),new XElement("X",X),new XElement("Y",Y),new XElement("Theme",Theme))).Save(temp);
@@ -492,8 +494,12 @@ namespace StandUp {
         protected override void Dispose(bool disposing){
             if(disposing&&!IsDisposed){timer.Stop();timer.Dispose();if(compact!=null)compact.Dispose();if(reminder!=null)reminder.Dispose();if(settingsWindow!=null)settingsWindow.Dispose();else drawer.Dispose();tray.Visible=false;if(tray.ContextMenuStrip!=null)tray.ContextMenuStrip.Dispose();tray.Dispose();if(trayIcon!=null)trayIcon.Dispose();if(SceneView.ContextMenuStrip!=null)SceneView.ContextMenuStrip.Dispose();tip.Dispose();if(appIcon!=null)appIcon.Dispose();}base.Dispose(disposing);
         }
+        void PrepareAlertPreview(Saying quote){
+            Clock.TestAlert();SceneView.Quote=quote;SceneView.StandAmount=1;RefreshState();
+        }
         public void RenderPreview(string folder){
             Directory.CreateDirectory(folder);Show();timer.Stop();
+            Saying previewQuote=Array.Find(Sayings.All,q=>q.Person=="每日鼓励");
             Size=ScaledSize(360,400);SceneView.Scene=3;
             for(int i=0;i<UiTheme.Names.Length;i++){
                 ApplyTheme(UiTheme.FromIndex(i));
@@ -502,24 +508,24 @@ namespace StandUp {
             ApplyTheme(UiTheme.White);
             foreach(int w in new[]{360,420,640}){
                 Size=ScaledSize(w,478);Clock.StartWork(DateTime.UtcNow,TimeSpan.FromMinutes(30));SceneView.StandAmount=0;SceneView.Person=0;SceneView.Scene=0;SceneView.Quote=null;RefreshState();CaptureImage(folder,"工作-"+w+".png");
-                Clock.TestAlert();SceneView.StandAmount=1;RefreshState();CaptureImage(folder,"提醒-"+w+".png");
+                PrepareAlertPreview(previewQuote);CaptureImage(folder,"提醒-"+w+".png");
             }
-            Size=ScaledSize(420,478);SceneView.Person=1;SceneView.Scene=1;SceneView.Quote=Sayings.All[4];Clock.TestAlert();SceneView.Quote=Sayings.All[4];SceneView.StandAmount=1;RefreshState();CaptureImage(folder,"周总理-湖边.png");
-            SceneView.Scene=2;CaptureImage(folder,"周总理-庭院.png");
+            Size=ScaledSize(420,478);SceneView.Person=1;SceneView.Scene=1;PrepareAlertPreview(previewQuote);CaptureImage(folder,"慢羊羊村长-湖边.png");
+            SceneView.Scene=2;CaptureImage(folder,"慢羊羊村长-庭院.png");
             for(int sc=0;sc<SceneLibrary.Names.Length;sc++){
                 SceneView.Scene=sc;SceneView.Person=0;SceneView.Quote=null;SceneView.StandAmount=0;Clock.StartWork(DateTime.UtcNow,TimeSpan.FromMinutes(30));RefreshState();CaptureImage(folder,"场景-"+SceneLibrary.Keys[sc]+".png");
-                Clock.TestAlert();SceneView.StandAmount=1;RefreshState();CaptureImage(folder,"站起-"+SceneLibrary.Keys[sc]+".png");
+                PrepareAlertPreview(previewQuote);CaptureImage(folder,"站起-"+SceneLibrary.Keys[sc]+".png");
             }
             ToggleDrawer();ApplyTheme(UiTheme.Black);themeChoice.SelectedIndex=1;CaptureForm(settingsWindow,folder,"设置-黑色.png");ToggleDrawer();
             ApplyTheme(UiTheme.White);
-            Saying longest=Sayings.All[6];foreach(Saying q in Sayings.All)if(q.Person=="每日鼓励"&&q.Text.Length>longest.Text.Length)longest=q;
-            Clock.TestAlert();SceneView.Quote=longest;SceneView.StandAmount=1;Size=ScaledSize(360,478);RefreshState();CaptureImage(folder,"励志语录-小窗口.png");
+            Saying longest=previewQuote;foreach(Saying q in Sayings.All)if(q.Person=="每日鼓励"&&q.Text.Length>longest.Text.Length)longest=q;
+            Size=ScaledSize(360,478);PrepareAlertPreview(longest);CaptureImage(folder,"励志语录-小窗口.png");
             Size=ScaledSize(420,478);CaptureImage(folder,"励志语录-新版.png");
             Size=ScaledSize(360,400);
             for(int p=0;p<CharacterLibrary.Names.Length;p++){
-                SceneView.Person=p;SceneView.Scene=p<2?3:1;SceneView.Quote=null;SceneView.StandAmount=0;
+                SceneView.Person=p;SceneView.Scene=1;SceneView.Quote=null;SceneView.StandAmount=0;
                 Clock.StartWork(DateTime.UtcNow,TimeSpan.FromMinutes(30));RefreshState();CaptureImage(folder,CharacterLibrary.Keys[p]+"-坐下.png");
-                Clock.TestAlert();SceneView.StandAmount=1;RefreshState();CaptureImage(folder,CharacterLibrary.Keys[p]+"-站起.png");
+                PrepareAlertPreview(previewQuote);CaptureImage(folder,CharacterLibrary.Keys[p]+"-站起.png");
             }
             Clock.StartWork(DateTime.UtcNow,TimeSpan.FromMinutes(30));SceneView.Quote=null;EnterCompact(false);CaptureForm(compact,folder,"精简模式.png");
             for(int i=0;i<UiTheme.Names.Length;i++){
@@ -530,7 +536,7 @@ namespace StandUp {
             foreach(DockEdge edge in CompactDock.Edges)if(CompactDock.IsAllowed(edge,taskbars)){
                 compact.RestorePlacement(compact.RememberedLocation,(int)edge);compact.ShowCompact(compact.Location,false);CaptureForm(compact,folder,"贴边把手.png");break;
             }
-            Clock.TestAlert();ShowReminderPopup();CaptureForm(reminder,folder,"提醒气泡.png");Close();
+            PrepareAlertPreview(previewQuote);ShowReminderPopup();CaptureForm(reminder,folder,"提醒气泡.png");Close();
         }
         public bool IsFirstFrameReady(){
             return !Visible&&digits.Text.Length>0&&caption.Text.Length>0&&status.Text.Length>0&&main.Text=="现在活动"&&pause.Text=="暂停";
@@ -563,7 +569,7 @@ namespace StandUp {
             }
             person.SelectedIndex=1;scene.SelectedIndex=1;task.SelectedIndex=1;minutes.Value=17;rest.Value=3;apply.PerformClick();
             check(SceneView.Person==1&&SceneView.Scene==1&&SceneView.Task==1&&Clock.Duration==TimeSpan.FromMinutes(17),"apply settings");
-            for(int p=2;p<CharacterLibrary.Names.Length;p++){
+            for(int p=0;p<CharacterLibrary.Names.Length;p++){
                 person.SelectedIndex=p;apply.PerformClick();
                 check(SceneView.Person==p,"animated companion selectable from settings");
             }
